@@ -63,13 +63,15 @@ This project builds a single-file UMD bundle (JavaScript with CSS injected at ru
 Build minified formBuilder only:
 
 ```bash
-LIB_ENTRY=form-builder npx vite build --config vite.config.lib.js
+LIB_ENTRY=form-builder npx vite build --mode minified --config vite.config.lib.js
+LIB_ENTRY=form-render npx vite build --mode minified --config vite.config.lib.js
 ```
 
 Build unminified formBuilder only:
 
 ```bash
 LIB_ENTRY=form-builder npx vite build --mode unminified --config vite.config.lib.js
+LIB_ENTRY=form-render npx vite build --mode unminified --config vite.config.lib.js
 ```
 
 Or run the package scripts:

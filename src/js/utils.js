@@ -10,6 +10,7 @@ window.fbLoaded = {
 }
 window.fbEditors = {
   quill: {},
+  summernote: {},
 }
 
 /**
