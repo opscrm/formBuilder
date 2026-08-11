@@ -61,9 +61,9 @@ jQuery(function ($) {
   const replaceFields = [
     {
       type: 'textarea',
-      subtype: 'tinymce',
-      datatype: 'custom-tinymce',
-      label: 'tinyMCE',
+      subtype: 'summernote',
+      datatype: 'custom-summernote',
+      label: 'Summernote',
       required: true,
     },
   ]
@@ -244,7 +244,7 @@ jQuery(function ($) {
     typeUserAttrs: typeUserAttrs,
     disableInjectedStyle: false,
     actionButtons: actionButtons,
-    disableFields: ['autocomplete', 'custom-tinymce'],
+    disableFields: ['autocomplete', 'custom-summernote'],
     replaceFields: replaceFields,
     disabledFieldButtons: {
       text: ['copy'],

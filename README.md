@@ -18,6 +18,72 @@ jQuery($ => {
 
 ## [Documentation](https://formbuilder.online/docs)
 
+## Installation
+
+### Use in an application
+
+Install from npm:
+
+```bash
+npm install formBuilder jquery jquery-ui-sortable
+```
+
+Then load formBuilder and initialize it:
+
+```javascript
+import 'jquery'
+import 'jquery-ui-sortable'
+import 'formBuilder'
+
+jQuery($ => {
+  $('#fb-editor').formBuilder()
+})
+```
+
+### Set up this repository for local development
+
+Clone and install dependencies:
+
+```bash
+git clone https://github.com/kevinchappell/formBuilder.git
+cd formBuilder
+npm install
+```
+
+If your environment does not have husky available during install, run:
+
+```bash
+npm install --ignore-scripts
+```
+
+## Recreate the formBuilder Bundle (Single File)
+
+This project builds a single-file UMD bundle (JavaScript with CSS injected at runtime) to the dist directory.
+
+Build minified formBuilder only:
+
+```bash
+LIB_ENTRY=form-builder npx vite build --config vite.config.lib.js
+```
+
+Build unminified formBuilder only:
+
+```bash
+LIB_ENTRY=form-builder npx vite build --mode unminified --config vite.config.lib.js
+```
+
+Or run the package scripts:
+
+```bash
+npm run build:lib:min
+npm run build:lib:unmin
+```
+
+Output files are generated as:
+
+- dist/form-builder.min.js
+- dist/form-builder.js
+
 ### Browser Support
 
 | ![Chrome](https://raw.github.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/src/safari/safari_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/src/opera/opera_48x48.png) | ![Edge](https://raw.github.com/alrra/browser-logos/master/src/edge/edge_48x48.png) |

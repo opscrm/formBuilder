@@ -280,10 +280,15 @@ class FormRender {
     const options = this.options
     const definedFields = options.formData.slice()
 
-    // save tinyMCE editors
+    // save summernote editors
     definedFields
-      .filter(fieldData => fieldData.subtype === 'tinymce')
-      .forEach(fieldData => window.tinymce.get(fieldData.name).save())
+      .filter(fieldData => fieldData.subtype === 'summernote')
+      .forEach(fieldData => {
+        const editor = $(`#${fieldData.name}`)
+        if (editor.length && editor.data('summernote')) {
+          editor.val(editor.summernote('code'))
+        }
+      })
 
     this.instanceContainers.forEach(container => {
       const userDataMap = $('select, input, textarea', container)
@@ -313,11 +318,16 @@ class FormRender {
   /** Clear all rendered fields */
   clear() {
     this.instanceContainers.forEach(container => {
-      // clear tinyMCE editors
+      // clear summernote editors
       this.options.formData
         .slice()
-        .filter(fieldData => fieldData.subtype === 'tinymce')
-        .forEach(fieldData => window.tinymce.get(fieldData.name).setContent(''))
+        .filter(fieldData => fieldData.subtype === 'summernote')
+        .forEach(fieldData => {
+          const editor = $(`#${fieldData.name}`)
+          if (editor.length && editor.data('summernote')) {
+            editor.summernote('code', '')
+          }
+        })
 
       container.querySelectorAll('input, select, textarea').forEach(input => {
         if (['checkbox', 'radio'].includes(input.type)) {

@@ -1,6 +1,6 @@
 import controlTextarea from '../../src/js/control/textarea.js'
-import controlTinymce from '../../src/js/control/textarea.tinymce'
 import controlQuill from '../../src/js/control/textarea.quill'
+import controlSummernote from '../../src/js/control/textarea.summernote'
 import { getScripts, getStyles, isCached } from '../../src/js/utils.js'
 
 const loadResources = async (js, css) => {
@@ -46,19 +46,19 @@ describe('Test Text Control', () => {
 })
 
 describe('Test building text variations and subtypes', () => {
-    // Skipped under Vitest/jsdom: the control fetches TinyMCE 4.x from a CDN, but
+    // Skipped under Vitest/jsdom: the control fetches Summernote from a CDN, but
     // jsdom runs external scripts in an isolated realm the test can't read, and the
-    // installed npm TinyMCE (v8) does not initialise its editor in jsdom. See the
+    // editor plugin does not initialise reliably in jsdom. See the
     // hermetic editor setup note in tests/setup-vitest.js.
-    test.skip('can render TinyMCE', async () => {
-      const controlInstance = new controlTinymce({
+    test.skip('can render Summernote', async () => {
+      const controlInstance = new controlSummernote({
         'type': 'textarea',
         'required': false,
-        'label': 'Test tinymce element',
+        'label': 'Test summernote element',
         'className': 'form-control',
-        'name': 'tinymce-elem',
+        'name': 'summernote-elem',
         'access': false,
-        'subtype': 'tinymce',
+        'subtype': 'summernote',
         userData: ['AValue'],
       }, false)
       controlInstance.configure()
@@ -66,27 +66,26 @@ describe('Test building text variations and subtypes', () => {
       expect(element.constructor.name).toBe('HTMLTextAreaElement')
       expect(element.type).toBe('textarea')
 
-      window.document.body.appendChild(element) //Element must be attached to dom for tinymce theme to work otherwise exception thrown
+      window.document.body.appendChild(element) // Element must be attached to dom for editor theme to work.
 
       await loadResources(controlInstance.js, controlInstance.css)
 
-      expect(window.tinymce).not.toBeUndefined()
+      expect($.fn.summernote).not.toBeUndefined()
       controlInstance.onRender()
-      //Await tinymce initialisation, this can take many seconds
+      // Await summernote initialisation
       await (new Promise(resolve => {
         const timer = setInterval(() => {
-          const tinyInstance = window.tinymce.get('tinymce-elem')
-          if (tinyInstance !== null && tinyInstance.initialized) {
+          const editor = $('#summernote-elem')
+          if (editor.length && editor.data('summernote')) {
             clearTimeout(timer)
             resolve()
           }
         }, 500)
       }))
-      const tinyInstance = window.tinymce.get('tinymce-elem')
-      expect(tinyInstance).not.toBeNull()
-      expect(tinyInstance.initialized).toBeTruthy()
-      expect(tinyInstance.getContent()).toBe('<p>AValue</p>')
-    },20000) //Longer timeout for tinymce initialisation
+      const editor = $('#summernote-elem')
+      expect(editor.length).toBe(1)
+      expect(editor.summernote('code')).toContain('AValue')
+    }, 20000)
 
     test('can render Quill', async () => {
       const controlInstance = new controlQuill({

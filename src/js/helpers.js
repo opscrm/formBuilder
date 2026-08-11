@@ -240,11 +240,11 @@ export default class Helpers {
                   const data = instance.getContents()
                   fieldData.value = window.JSON.stringify(data.ops)
                 }
-              } else if (fieldData.subtype === 'tinymce' && window.tinymce) {
+              } else if (fieldData.subtype === 'summernote' && $.fn.summernote) {
                 const id = `${fieldData.name}-preview`
-                const editor = window.tinymce.get(id)
-                if (editor) {
-                  fieldData.value = editor.getContent()
+                const editor = $(`#${id}`)
+                if (editor.length && editor.data('summernote')) {
+                  fieldData.value = editor.summernote('code')
                 }
               }
             }

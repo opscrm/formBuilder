@@ -1062,7 +1062,7 @@ function FormBuilder(opts, element, $) {
         className: `form-group ${attribute}-wrap`,
       }
 
-      if (attribute === 'value' && values.subtype === 'quill' || isHidden) {
+      if (attribute === 'value' && ['quill', 'summernote'].includes(values.subtype) || isHidden) {
         fieldAttrs.style = 'display: none'
       }
 
@@ -1487,7 +1487,7 @@ function FormBuilder(opts, element, $) {
 
         const listFieldItem = $(ui.item).find('li')
         if (listFieldItem.length) {
-          CheckTinyMCETransition(listFieldItem)
+          CheckSummernoteTransition(listFieldItem)
           UpdatePreviewAndSave(listFieldItem)
           h.tmpCleanPrevHolder($(ui.item).find('.prev-holder'))
         }
@@ -1513,10 +1513,10 @@ function FormBuilder(opts, element, $) {
     }
   }
 
-  function CheckTinyMCETransition(fieldListItem) {
-    const isTinyMCE = fieldListItem.find('textarea[type="tinymce"]')
-    if (isTinyMCE.length) {
-      window.lastFormBuilderCopiedTinyMCE = window.tinymce.get(isTinyMCE.attr('id')).save()
+  function CheckSummernoteTransition(fieldListItem) {
+    const isSummernote = fieldListItem.find('textarea[type="summernote"]')
+    if (isSummernote.length) {
+      window.lastFormBuilderCopiedSummernote = $(isSummernote).summernote('code')
     }
   }
 
@@ -1659,7 +1659,7 @@ function FormBuilder(opts, element, $) {
   const cloneItem = function cloneItem(currentItem) {
     data.lastID = h.incrementId(data.lastID)
 
-    CheckTinyMCETransition(currentItem)
+    CheckSummernoteTransition(currentItem)
 
     const currentId = currentItem.attr('id')
     const type = currentItem.attr('type')
@@ -1786,7 +1786,7 @@ function FormBuilder(opts, element, $) {
   $stage.on('change', '[name="subtype"]', e => {
     const $field = $(e.target).closest('li.form-field')
     const $valWrap = $('.value-wrap', $field)
-    $valWrap.toggle(e.target.value !== 'quill')
+    $valWrap.toggle(!['quill', 'summernote'].includes(e.target.value))
   })
 
   $stage.on('change', '[name="name"]', e => {

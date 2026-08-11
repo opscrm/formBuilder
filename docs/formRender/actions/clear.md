@@ -1,6 +1,6 @@
 # `clear` action
 
-Clears all user data from the form, even tinyMCE.
+Clears all user data from the form, including Summernote editors.
 
 ## Usage
 ```javascript

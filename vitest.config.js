@@ -20,7 +20,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     // Mirror the original Jest testEnvironmentOptions so control plugins that
-    // load editors (TinyMCE/Quill) from a CDN behave as they did under Jest.
+    // load editors (Summernote/Quill) from a CDN behave as they did under Jest.
     environmentOptions: {
       jsdom: {
         resources: 'usable',

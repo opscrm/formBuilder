@@ -10,7 +10,6 @@ window.fbLoaded = {
 }
 window.fbEditors = {
   quill: {},
-  tinymce: {},
 }
 
 /**

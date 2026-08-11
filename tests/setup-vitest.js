@@ -8,7 +8,7 @@ global.$ = $
 global.jQuery = $
 global.FB_EN_US = langFiles['en-US']
 
-// External scripts (TinyMCE/Quill/rateYo and the built bundle) are executed by
+// External scripts (Summernote/Quill/rateYo and the built bundle) are executed by
 // jsdom against the window object, so jQuery must also live on window for those
 // scripts to find it.
 if (typeof window !== 'undefined') {
@@ -41,12 +41,12 @@ if (!global.crypto) {
 }
 
 // --- Hermetic editor libraries ---
-// The rich-text/rating controls load TinyMCE/Quill/rateYo from a CDN at runtime.
+// The rich-text/rating controls load Summernote/Quill/rateYo from a CDN at runtime.
 // jsdom executes those external scripts in an isolated realm whose globals the
 // test code cannot read, so the CDN approach can't work under Vitest. Instead we
 // load the equivalent npm packages into the test realm and mark the CDN URLs as
 // already-loaded (below) so the controls skip the unusable network fetch.
-// (TinyMCE is not provided here — its editor can't initialise in jsdom — so that
+// (Summernote is not provided here — its editor can't initialise in jsdom — so that
 // test is skipped at the call site.)
 try {
   await import('rateyo') // registers $.fn.rateYo on the shared jQuery instance
@@ -63,6 +63,7 @@ try {
 const preloadedScripts = [
   'https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.js',
   'https://cdn.quilljs.com/1.2.4/quill.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/summernote/0.9.1/summernote.min.js',
   // The built bundle is a jQuery IIFE that can't execute in jsdom's isolated
   // script realm; the getScripts test only checks that the URL is recorded.
   'https://formbuilder.online/assets/js/form-builder.min.js',
@@ -70,6 +71,7 @@ const preloadedScripts = [
 const preloadedStyles = [
   'https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.css',
   'https://cdn.quilljs.com/1.2.4/quill.snow.css',
+  'https://cdnjs.cloudflare.com/ajax/libs/summernote/0.9.1/summernote.min.css',
 ]
 
 // Mark the editor CDN resources as already-loaded so controls render against the
