@@ -86,6 +86,12 @@ export default defineConfig({
               ? '<script type="module" src="/src/js/form-render.js"></script>'
               : '<script type="text/javascript" src="assets/js/form-render.min.js"></script>',
           )
+          .replace(
+            '<!-- DEMO_SCRIPT -->',
+            isDev
+              ? '<script type="module" src="/src/demo/js/demo.js"></script>'
+              : '<script type="text/javascript" src="assets/js/demo.min.js"></script>',
+          )
       },
     },
     serveDemoAtRootPlugin(),
