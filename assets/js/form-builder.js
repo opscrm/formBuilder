@@ -558,7 +558,11 @@
 				"canvas",
 				"output"
 			],
-			textarea: ["textarea", "quill"]
+			textarea: [
+				"textarea",
+				"quill",
+				"summernote"
+			]
 		};
 		/**
 		* Removes a dom node
@@ -1689,10 +1693,7 @@
 			js: [],
 			css: []
 		};
-		window.fbEditors = {
-			quill: {},
-			tinymce: {}
-		};
+		window.fbEditors = { quill: {} };
 		/**
 		* Remove null, undefined, empty string or empty array values from an object, original object is not modified
 		* @param  {Object} obj {attrName: attrValue}
@@ -3102,10 +3103,9 @@
 										const data = window.fbEditors.quill[id].instance.getContents();
 										fieldData.value = window.JSON.stringify(data.ops);
 									}
-								} else if (fieldData.subtype === "tinymce" && window.tinymce) {
-									const id = `${fieldData.name}-preview`;
-									const editor = window.tinymce.get(id);
-									if (editor) fieldData.value = editor.getContent();
+								} else if (fieldData.subtype === "summernote" && $.fn.summernote) {
+									const editor = $(`#${`${fieldData.name}-preview`}`);
+									if (editor.length && editor.data("summernote")) fieldData.value = editor.summernote("code");
 								}
 							}
 							if (roleVals.length) fieldData.role = roleVals.join(",");
@@ -4669,104 +4669,6 @@
 		control.register("textarea", controlTextarea);
 		control.register("textarea", controlTextarea, "textarea");
 		//#endregion
-		//#region src/js/control/textarea.tinymce.js
-		/**
-		* TinyMCE editor element
-		* See https://www.tinymce.com/ for more info
-		*
-		* To customise the options on this editor, simply pass any properties you wish to overwrite in the controlConfig option to formRender
-		* e.g. the below example would disable the ability to paste images as a base64 encoded src
-		* ```
-		* var renderOpts = {
-		*    controlConfig: {
-		*      'textarea.tinymce': {
-		*         paste_data_images: false
-		*       }
-		*    }
-		* };
-		* ```
-		* @extends controlTextarea
-		*/
-		var controlTinymce = class extends controlTextarea {
-			/**
-			* configure the tinymce editor requirements
-			*/
-			configure() {
-				this.js = [];
-				if (!window.tinymce) this.js.push("https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.9.11/tinymce.min.js");
-				if (this.classConfig.js) {
-					let js = this.classConfig.js;
-					if (!Array.isArray(js)) js = new Array(js);
-					this.js = this.js.concat(js);
-					delete this.classConfig.js;
-				}
-				if (this.classConfig.css) this.css = this.classConfig.css;
-				this.editorOptions = {
-					height: 250,
-					paste_data_images: true,
-					plugins: [
-						"advlist",
-						"autolink",
-						"lists",
-						"link",
-						"image",
-						"charmap",
-						"print",
-						"preview",
-						"anchor",
-						"searchreplace",
-						"visualblocks",
-						"code",
-						"fullscreen",
-						"insertdatetime",
-						"media",
-						"table",
-						"contextmenu",
-						"paste",
-						"code"
-					],
-					toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | table"
-				};
-			}
-			/**
-			* build a textarea DOM element, to be later replaced by the TinyMCE editor
-			* @return {Object} DOM Element to be injected into the form.
-			*/
-			build() {
-				const { value = "", ...attrs } = this.config;
-				delete attrs["type"];
-				this.field = this.markup("textarea", this.parsedHtml(value), attrs);
-				if (attrs.disabled) this.editorOptions.readonly = true;
-				return this.field;
-			}
-			/**
-			* When the element is rendered into the DOM, execute the following code to initialise it
-			*/
-			onRender() {
-				const oldInst = window.tinymce.get(this.id);
-				if (oldInst) window.tinymce.remove(oldInst);
-				const options = jQuery.extend(this.editorOptions, this.classConfig);
-				options.target = this.field;
-				const removedPlugins = [];
-				if (Number(window.tinymce.majorVersion) >= 5) removedPlugins.push("contextmenu");
-				if (Number(window.tinymce.majorVersion) >= 6) removedPlugins.push("paste", "print");
-				options.plugins = options.plugins.filter((plugin) => {
-					return removedPlugins.indexOf(plugin) === -1;
-				});
-				const userData = this.config.userData ? this.parsedHtml(this.config.userData[0]) : void 0;
-				const copiedData = window.lastFormBuilderCopiedTinyMCE ? this.parsedHtml(window.lastFormBuilderCopiedTinyMCE) : void 0;
-				window.lastFormBuilderCopiedTinyMCE = null;
-				const afterInit = function(inst) {
-					if (copiedData) inst[0].setContent(copiedData);
-					else if (userData) inst[0].setContent(userData);
-				};
-				setTimeout(() => {
-					window.tinymce.init(options).then(afterInit);
-				}, 0);
-			}
-		};
-		controlTextarea.register("tinymce", controlTinymce, "textarea");
-		//#endregion
 		//#region src/js/control/textarea.quill.js
 		/**
 		* Quill rich text editor element
@@ -4839,6 +4741,99 @@
 			}
 		};
 		controlTextarea.register("quill", controlQuill, "textarea");
+		//#endregion
+		//#region src/js/control/textarea.summernote.js
+		/**
+		* Summernote rich text editor element
+		* See https://summernote.org/ for more info
+		*
+		* To customise the options on this editor, pass properties in controlConfig to formRender
+		* e.g.
+		* {
+		*   controlConfig: {
+		*     'textarea.summernote': {
+		*       height: 200
+		*     }
+		*   }
+		* }
+		* @extends controlTextarea
+		*/
+		var controlSummernote = class extends controlTextarea {
+			/**
+			* configure the summernote editor requirements
+			*/
+			configure() {
+				const defaultClassConfig = {
+					js: "https://cdnjs.cloudflare.com/ajax/libs/summernote/0.9.1/summernote.min.js",
+					css: "https://cdnjs.cloudflare.com/ajax/libs/summernote/0.9.1/summernote.min.css"
+				};
+				const defaultEditorOptions = {
+					height: 250,
+					dialogsInBody: true,
+					toolbar: [
+						["style", ["style"]],
+						["font", [
+							"bold",
+							"italic",
+							"underline",
+							"clear"
+						]],
+						["para", [
+							"ul",
+							"ol",
+							"paragraph"
+						]],
+						["insert", [
+							"link",
+							"picture",
+							"table"
+						]],
+						["view", ["codeview"]]
+					]
+				};
+				const [customClassConfig, customEditorOptions] = utils.splitObject(this.classConfig, ["css", "js"]);
+				Object.assign(this, {
+					...defaultClassConfig,
+					...customClassConfig
+				});
+				this.editorOptions = {
+					...defaultEditorOptions,
+					...customEditorOptions
+				};
+			}
+			/**
+			* build a textarea DOM element, to be later replaced by the Summernote editor
+			* @return {Object} DOM Element to be injected into the form.
+			*/
+			build() {
+				const { value = "", ...attrs } = this.config;
+				delete attrs["type"];
+				this.field = this.markup("textarea", this.parsedHtml(value), attrs);
+				return this.field;
+			}
+			/**
+			* When the element is rendered into the DOM, execute the following code to initialise it
+			*/
+			onRender() {
+				const userData = this.config.userData ? this.parsedHtml(this.config.userData[0]) : void 0;
+				const copiedData = window.lastFormBuilderCopiedSummernote ? this.parsedHtml(window.lastFormBuilderCopiedSummernote) : void 0;
+				window.lastFormBuilderCopiedSummernote = null;
+				const $field = $(this.field);
+				if ($field.data("summernote")) $field.summernote("destroy");
+				const options = jQuery.extend({}, this.editorOptions, this.classConfig);
+				const existingOnInit = options.callbacks?.onInit;
+				options.callbacks = jQuery.extend({}, options.callbacks, { onInit: () => {
+					if (copiedData) $field.summernote("code", copiedData);
+					else if (userData) $field.summernote("code", userData);
+					if (this.config.disabled) $field.summernote("disable");
+					if (typeof existingOnInit === "function") existingOnInit();
+				} });
+				setTimeout(() => {
+					$field.summernote(options);
+				}, 0);
+			}
+		};
+		controlTextarea.register("summernote", controlSummernote, "textarea");
 		//#endregion
 		//#region src/js/customControls.js
 		/**
@@ -6152,7 +6147,7 @@
 					}
 					const inputWrap = m("div", attributefield, { className: "input-wrap" });
 					const fieldAttrs = { className: `form-group ${attribute}-wrap` };
-					if (attribute === "value" && values.subtype === "quill" || isHidden) fieldAttrs.style = "display: none";
+					if (attribute === "value" && ["quill", "summernote"].includes(values.subtype) || isHidden) fieldAttrs.style = "display: none";
 					attributefield = m("div", [attributeLabel, inputWrap], fieldAttrs);
 				}
 				return attributefield;
@@ -6428,7 +6423,7 @@
 						ResetAllInvisibleRowPlaceholders();
 						const listFieldItem = $(ui.item).find("li");
 						if (listFieldItem.length) {
-							CheckTinyMCETransition(listFieldItem);
+							CheckSummernoteTransition(listFieldItem);
 							UpdatePreviewAndSave(listFieldItem);
 							h.tmpCleanPrevHolder($(ui.item).find(".prev-holder"));
 						}
@@ -6450,9 +6445,9 @@
 				const rowId = h.getRowValue(rowWrapperNode.className);
 				if (rowId !== "0") $(rowWrapperNode).attr("data-row-id", rowId);
 			}
-			function CheckTinyMCETransition(fieldListItem) {
-				const isTinyMCE = fieldListItem.find("textarea[type=\"tinymce\"]");
-				if (isTinyMCE.length) window.lastFormBuilderCopiedTinyMCE = window.tinymce.get(isTinyMCE.attr("id")).save();
+			function CheckSummernoteTransition(fieldListItem) {
+				const isSummernote = fieldListItem.find("textarea[type=\"summernote\"]");
+				if (isSummernote.length) window.lastFormBuilderCopiedSummernote = $(isSummernote).summernote("code");
 			}
 			function UpdatePreviewAndSave(fieldListItem) {
 				h.updatePreview(fieldListItem);
@@ -6568,7 +6563,7 @@
 			};
 			const cloneItem = function cloneItem(currentItem) {
 				data.lastID = h.incrementId(data.lastID);
-				CheckTinyMCETransition(currentItem);
+				CheckSummernoteTransition(currentItem);
 				const currentId = currentItem.attr("id");
 				const type = currentItem.attr("type");
 				const cloneName = nameAttr({ type });
@@ -6656,7 +6651,7 @@
 				}
 			});
 			$stage.on("change", "[name=\"subtype\"]", (e) => {
-				$(".value-wrap", $(e.target).closest("li.form-field")).toggle(e.target.value !== "quill");
+				$(".value-wrap", $(e.target).closest("li.form-field")).toggle(!["quill", "summernote"].includes(e.target.value));
 			});
 			$stage.on("change", "[name=\"name\"]", (e) => {
 				const name = e.target.value;
