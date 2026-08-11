@@ -1034,7 +1034,10 @@
 			js: [],
 			css: []
 		};
-		window.fbEditors = { quill: {} };
+		window.fbEditors = {
+			quill: {},
+			summernote: {}
+		};
 		/**
 		* Remove null, undefined, empty string or empty array values from an object, original object is not modified
 		* @param  {Object} obj {attrName: attrValue}
